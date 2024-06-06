@@ -1,39 +1,40 @@
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 
-public class Solution {
+class Solution {
     public boolean isNStraightHand(int[] hand, int groupSize) {
-        int n = hand.length;
-        if (n % groupSize != 0) {
+        if(groupSize == 1) {
+            return true;
+        }
+        int handSize = hand.length;
+        if (handSize % groupSize != 0) {
             return false;
         }
+
         Arrays.sort(hand);
-        List<List<Integer>> listOfHands = new ArrayList<>();
-        for (int i = 0; i < n / groupSize; i++) {
-            listOfHands.add(new ArrayList<>());
-        }
 
-        for (int i = 0; i < n; i++) {
-            int card = hand[i];
-            boolean inserted = false;
-            for (int j = 0; j < listOfHands.size(); j++) {
-                if (listOfHands.get(j).size() == 0) {
-                    listOfHands.get(j).add(card);
-                    inserted = true;
-                    break;
-                } else if (listOfHands.get(j).size() < groupSize) {
-                    if ((listOfHands.get(j).get(listOfHands.get(j).size() - 1) - card) == -1) {
-                        listOfHands.get(j).add(card);
-                        inserted = true;
-                        break;
+        PriorityQueue<int[]> pq = new PriorityQueue<>(Comparator.comparing((int[] a) -> a[0]).thenComparing((int[] a) -> -a[1]));
+
+        for (int i = 0; i < hand.length; i++) {
+            if (pq.isEmpty()) {
+                pq.offer(new int[]{hand[i], 1});
+            } else {
+                if (pq.peek()[0] == hand[i] - 1) {
+                    int c = pq.poll()[1];
+                    c++;
+                    if (c != groupSize) {
+                        pq.offer(new int[]{hand[i], c});
                     }
+                } else if (pq.peek()[0] == hand[i]) {
+                    pq.offer(new int[]{hand[i], 1});
+                } else {
+                    return false;
                 }
-
             }
-            if (!inserted) return false;
 
         }
-        return true;
+
+        return pq.isEmpty();
     }
 }
